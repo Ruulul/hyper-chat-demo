@@ -36,7 +36,7 @@ await discovery.flushed().then(()=>int.write("Room joined succesfully\n"))
 swarm.on('connection', conn => {
     int.write("Someone connected!\n")
     int.write(swarm.connections.size + " connections\n")
-    conn.on('data', data => int.write('\n' + data + '\n'))
+    conn.on('data', data => int.write('\n' + data + ''))
     conn.on('error', console.error)
 })
 
