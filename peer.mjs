@@ -28,7 +28,7 @@ swarm.on('connection', conn => {
     int.write(`Someone connected!\n${prefix}`)
     conn.on('data', msg => {
       const {user, data}= JSON.parse(msg)
-      int.write(`${user}: ${data}\n${prefix}`)
+      int.write(`\n${user}: ${data}\n${prefix}`)
     })
     conn.on('error', console.error)
 })
