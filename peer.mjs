@@ -21,8 +21,7 @@ const user = await question("Whats your user?\n:")
 const prefix = user + ': '
 const room_name = await question("In which room will you enter?\n:")
 const room = 'v142857-chat-demo-'+room_name;
-const topic = b4a.alloc(32)
-b4a.fill(topic, room, 0, room.length)
+const topic = b4a.alloc(32, room)
 console.log(room, topic)
 const swarm = new Hyperswarm()
 
