@@ -27,7 +27,10 @@ chat_section.append(messages, message_div, user_div)
 
 change_user_btn.onclick = ()=>{
     user = user_input.value
-    if (!document.body.contains(chat_section)) document.body.append(chat_section)
+    if (!document.body.contains(chat_section)) {
+        chat_section.append(user_div)
+        document.body.append(chat_section)
+    }
 }
 send_message_btn.onclick = async ()=>{
     send_message_btn.disabled = true
@@ -40,10 +43,15 @@ onmessage((_, {user, data})=>messages.innerHTML += `<p><span>${user}: </span>${d
 
 connect_btn.onclick = async ()=>{
     if (!room_name.value) return
+    if (document.body.contains(chat_section)) {
+        chat_section.remove()
+        messages.innerHTML = ''
+    }
     connect_btn.disabled = true
     const topic = 'v142857-chat-demo-' + room_name.value
     const buffer = b4a.alloc(32, topic)
     await join_topic(buffer)
     connect_btn.disabled = false
-    document.body.append(user_div)
+    if (!user) document.body.append(user_div) 
+    else document.body.append(chat_section)
 }
