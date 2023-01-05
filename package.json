@@ -9,22 +9,11 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "b4a": "^1.6.1",
-    "corestore": "^6.4.0",
-    "debounceify": "^1.0.0",
     "graceful-goodbye": "^1.2.0",
-    "hyperbee": "^2.2.0",
     "hypercore": "^10.5.3",
-    "hypercore-crypto": "^3.3.0",
-    "hyperdrive": "11.0.0-alpha.10",
-    "hypershell": "^0.0.6",
-    "hyperswarm": "^4.3.5",
-    "localdrive": "^1.4.0",
-    "readline-promise": "^1.0.5"
-  },
-  "devDependencies": {
-    "@tauri-apps/cli": "^1.2.2"
+    "hyperswarm": "^4.3.5"
   }
 }
