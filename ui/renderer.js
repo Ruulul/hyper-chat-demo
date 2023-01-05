@@ -1,4 +1,4 @@
-const { b4a, join_topic, send_message, onmessage } = api;
+const { b4a, join_topic, send_message, onmessage, onconnect, ondisconnect } = api;
 const room_name = document.createElement("input");
 room_name.placeholder = "Insert the room name here!";
 
@@ -12,6 +12,11 @@ document.body.append(connect_section)
 
 const chat_section = document.createElement("section")
 const messages = document.createElement("section")
+const connections_count = document.createElement("span")
+const connections_message = document.createElement("p")
+connections_message.textContent = "Connections: "
+connections_message.append(connections_count)
+messages.append(connections_message)
 const user_input = document.createElement("input")
 var user = undefined
 const message = document.createElement("textarea")
@@ -25,23 +30,24 @@ user_div.append(user_input, change_user_btn)
 message_div.append(message, send_message_btn)
 chat_section.append(messages, message_div, user_div)
 
-change_user_btn.onclick = ()=>{
+change_user_btn.onclick = () => {
     user = user_input.value
     if (!document.body.contains(chat_section)) {
         chat_section.append(user_div)
         document.body.append(chat_section)
     }
 }
-send_message_btn.onclick = async ()=>{
+send_message_btn.onclick = async () => {
     send_message_btn.disabled = true
-    await send_message({user, data: message.value})
+    await send_message({ user, data: message.value })
     messages.innerHTML += `<p><span>${user}: </span>${message.value}`
     message.value = ''
     send_message_btn.disabled = false
 }
-onmessage((_, {user, data})=>messages.innerHTML += `<p><span>${user}: </span>${data}`)
-
-connect_btn.onclick = async ()=>{
+onmessage((_, { user, data }) => messages.innerHTML += `<p><span>${user}: </span>${data}`)
+onconnect((_, { connections }) => connections_count.textContent = connections)
+ondisconnect(() => connections_count.textContent -= 1)
+connect_btn.onclick = async () => {
     if (!room_name.value) return
     if (document.body.contains(chat_section)) {
         chat_section.remove()
@@ -52,6 +58,6 @@ connect_btn.onclick = async ()=>{
     const buffer = b4a.alloc(32, topic)
     await join_topic(buffer)
     connect_btn.disabled = false
-    if (!user) document.body.append(user_div) 
+    if (!user) document.body.append(user_div)
     else document.body.append(chat_section)
 }

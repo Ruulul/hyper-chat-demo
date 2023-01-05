@@ -15,18 +15,19 @@ const createWindow = () => {
         }
     })
     win.loadFile(path.join(__dirname, 'index.html'))
-
-    swarm.on('connection', conn => {
-        conn.on('data', message => win.webContents.send('new-message', JSON.parse(message)))
-        conn.on('error', console.log)
-    })
+    return win
 }
 
 app.whenReady().then(() => {
-    createWindow()
+    const win = createWindow()
 
     ipcMain.handle('join-topic', join_topic)
     ipcMain.handle('send-message', send_message)
+    swarm.on('connection', conn => {
+        win.webContents.send('connect', {connections: swarm.connections.size})
+        conn.on('data', message => win.webContents.send('new-message', JSON.parse(message)))
+        conn.on('error', ()=>win.webContents.send('disconnect'))
+    })
 
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) createWindow()
