@@ -25,7 +25,10 @@ user_div.append(user_input, change_user_btn)
 message_div.append(message, send_message_btn)
 chat_section.append(messages, message_div, user_div)
 
-change_user_btn.onclick = ()=>user = user_input.value
+change_user_btn.onclick = ()=>{
+    user = user_input.value
+    if (!document.body.contains(chat_section)) document.body.append(chat_section)
+}
 send_message_btn.onclick = async ()=>{
     send_message_btn.disabled = true
     await send_message({user, data: message.value})
@@ -33,16 +36,14 @@ send_message_btn.onclick = async ()=>{
     message.value = ''
     send_message_btn.disabled = false
 }
-onmessage(({user, data})=>messages.innerHTML += `<p><span>${user}: </span>${data}`)
+onmessage((_, {user, data})=>messages.innerHTML += `<p><span>${user}: </span>${data}`)
 
 connect_btn.onclick = async ()=>{
     if (!room_name.value) return
     connect_btn.disabled = true
     const topic = 'v142857-chat-demo-' + room_name.value
-    const buffer = b4a.alloc(32)
-    b4a.fill(buffer, topic, 0, topic.length)
-    console.log(topic, buffer)
+    const buffer = b4a.alloc(32, topic)
     await join_topic(buffer)
     connect_btn.disabled = false
-    document.body.append(chat_section)
+    document.body.append(user_div)
 }

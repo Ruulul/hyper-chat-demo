@@ -37,15 +37,16 @@ app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit()
 })
 
-async function join_topic(new_topic) {
+async function join_topic(_, new_topic) {
     if (topic) {
-        await Promise.all(swarm.connections.map(conn => conn.end()))
+        await Promise.all([...swarm.connections].map(conn => conn.end()))
         await swarm.leave(topic)
     }
     topic = new_topic
     await swarm.join(topic).flushed()
 }
 
-async function send_message(message) {
-    return Promise.all(...swarm.connections.map(conn => conn.write(JSON.stringify(message))))
+async function send_message(_, message) {
+    for (const [thinghy, conn] of swarm.connections.entries())
+        conn.write(JSON.stringify(message))
 }
