@@ -25,8 +25,10 @@ const swarm = new Hyperswarm()
 
 swarm.on('connection', conn => {
     int.write("Someone connected!\n")
-    int.write(swarm.connections.size + " connections\n")
-    conn.on('data', data => int.write('\r\n' + data + '\n'))
+    conn.on('data', msg => {
+      const {user, data}= JSON.parse(msg)
+      int.write(`${user}: ${data}\n`)
+    })
     conn.on('error', console.error)
 })
 
@@ -45,6 +47,6 @@ while (true) {
     const prefix = user + ': '
     const input = await question(prefix)
     swarm.connections.forEach(conn => {
-        conn.write(prefix + input)
+        conn.write(JSON.stringify({user, data: input}))
     })
 }
