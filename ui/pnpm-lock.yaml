@@ -1,11 +1,15 @@
 lockfileVersion: 5.4
 
 specifiers:
+  b4a: ^1.6.1
   browserify: ^17.0.0
   budo: ^11.8.4
   electron: ^22.0.0
   hyperswarm: ^4.3.5
   nodemon: ^2.0.20
+
+dependencies:
+  b4a: 1.6.1
 
 devDependencies:
   browserify: 17.0.0
@@ -202,7 +206,6 @@ packages:
 
   /b4a/1.6.1:
     resolution: {integrity: sha512-AsKjNhz72yxteo/0EtQEiwkMUgk/tGmycXlbG4g3Ard2/ULtNLUykGOkeK0egmN27h0xMAhb76jYccW+XTBExA==}
-    dev: true
 
   /balanced-match/1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
