@@ -47,6 +47,7 @@ async function run_cli() {
       }
       function disconnect() {
         int.write(`\n${nicks[from] || from.toString('hex')} disconnected!\n${prefix}`)
+        delete nicks[from]
       }
       function nick() {
         int.write(`\npeer ${nicks[from] || from.toString('hex')} now is named ${data}\n${prefix}`)
