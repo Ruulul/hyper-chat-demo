@@ -1,7 +1,7 @@
 const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('api', {
-    b4a: require('b4a'),
+    require: module => require(module),
     join_topic: topic => ipcRenderer.invoke('join-topic', topic),
     exit: () => ipcRenderer.send('exit'),
     send_message: message => ipcRenderer.invoke('send-message', message),

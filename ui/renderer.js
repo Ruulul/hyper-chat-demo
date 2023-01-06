@@ -1,5 +1,8 @@
-const { b4a, join_topic, send_message, onmessage, onconnect, ondisconnect, exit } = api;
+const { require, join_topic, send_message, onmessage, onconnect, ondisconnect, exit } = api;
+const b4a = require("b4a")
+const prefix = 'v142857-chat-demo-'
 const room_name = document.createElement("input");
+room_name.maxLength = 32 - prefix.length
 room_name.placeholder = "Insert the room name here!";
 
 const connect_btn = document.createElement("button");
@@ -55,10 +58,11 @@ connect_btn.onclick = async () => {
         messages.innerHTML = ''
     }
     connect_btn.disabled = true
-    const room = 'v142857-chat-demo-'+room_name.value;
+    const room = prefix + room_name.value;
     const topic = b4a.alloc(32)
+    console.log(room, ...topic)
     b4a.fill(topic, room, 0, room.length)
-    console.log(room, topic)
+    console.log(room, ...topic)
     await join_topic(topic)
     connect_btn.disabled = false
     if (!user) document.body.append(user_div)

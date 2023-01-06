@@ -58,8 +58,9 @@ async function send_message(_, message) {
 }
 
 async function exit() {
+    if (swarm.destroyed) return app.quit()
     await Promise.all([...swarm.connections].map(conn => conn.end()))
-    await swarm.leave(topic)
+    if (topic) await swarm.leave(topic)
     await swarm.destroy()
     console.log("Everything cleaned up!")
 }
