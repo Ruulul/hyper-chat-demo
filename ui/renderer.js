@@ -1,4 +1,4 @@
-const { b4a, join_topic, send_message, onmessage, onconnect, ondisconnect, exit } = api;
+const { b4a, join_topic, change_nick, send_message, onmessage, onconnect, ondisconnect, onnick, exit } = api;
 const prefix = 'v142857-chat-demo-'
 const room_name = document.createElement("input");
 room_name.placeholder = "Insert the room name here!";
@@ -33,6 +33,7 @@ chat_section.append(messages, message_div, user_div)
 
 change_user_btn.onclick = () => {
     user = user_input.value
+    change_nick(user)
     if (!document.body.contains(chat_section)) {
         chat_section.append(user_div)
         document.body.append(chat_section)
@@ -40,14 +41,22 @@ change_user_btn.onclick = () => {
 }
 send_message_btn.onclick = async () => {
     send_message_btn.disabled = true
-    await send_message({ user, data: message.value })
+    await send_message(message.value)
     messages.innerHTML += `<p><span>${user}: </span>${message.value}`
     message.value = ''
     send_message_btn.disabled = false
 }
-onmessage((_, { user, data }) => messages.innerHTML += `<p><span>${user}: </span>${data}`)
-onconnect((_, { connections }) => connections_count.textContent = connections)
-ondisconnect(() => connections_count.textContent -= 1)
+var nicks = {}
+onnick((_, message)=>{
+    const {head: [from], data: nick} = message
+    nicks[from] = nick
+})
+onmessage((_, { head:[from], data }) => messages.innerHTML += `<p><span>${nicks[from] || 'anom'}: </span>${data}`)
+onconnect((_, connections) => {
+    console.log('connections: ', connections)
+    connections_count.textContent = connections
+})
+ondisconnect((_, {head: [from]}) => (delete nicks[from], connections_count.textContent -= 1))
 addEventListener('beforeunload', exit)
 connect_btn.onclick = async () => {
     if (!room_name.value) return

@@ -29,18 +29,23 @@ app.whenReady().then(async () => {
             }
             handle[type]()
             function handle_message() {
+                console.log("got message")
                 win.webContents.send('new-message', message)
             }
             function nick() {
+                console.log("got nick")
                 win.webContents.send('nick', message)
             }
             function connection() {
+                console.log("got connection")
                 win.webContents.send('connection', message)
             }
             function connections() {
+                console.log("connections requested")
                 win.webContents.send('connections', data)
             }
             function disconnect() {
+                console.log("someone leave")
                 win.webContents.send('disconnect', message)
             }
         }
@@ -48,6 +53,7 @@ app.whenReady().then(async () => {
     ipcMain.handle('join-topic', join_topic)
     ipcMain.handle('send-message', send_message)
     ipcMain.on('exit', exit)
+    ipcMain.on('change-nick', (_, data) => chat({type: 'change-nick', data}))
 
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) win = createWindow()
