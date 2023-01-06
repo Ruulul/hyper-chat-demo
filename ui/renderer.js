@@ -1,4 +1,11 @@
-const { b4a, join_topic, change_nick, send_message, onmessage, onconnect, ondisconnect, onnick, exit } = api;
+const { 
+    join_topic, 
+    change_nick, 
+    send_message, 
+    request_connections,
+    onmessage, onconnect, onconnections, ondisconnect, onnick, 
+    exit 
+} = api;
 const prefix = 'v142857-chat-demo-'
 const room_name = document.createElement("input");
 room_name.placeholder = "Insert the room name here!";
@@ -20,6 +27,9 @@ connections_message.textContent = "Connections: "
 connections_count.textContent = 0
 
 connections_message.append(connections_count)
+connections_message.onclick = request_connections
+onconnections((_, connections) => connections_count.textContent = connections)
+connections_message.title = "Click me to update"
 messages.append(connections_message)
 const user_input = document.createElement("input")
 var user = undefined

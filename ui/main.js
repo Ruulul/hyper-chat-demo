@@ -35,15 +35,12 @@ app.whenReady().then(async () => {
                 win.webContents.send('nick', message)
             }
             function connection() {
-                console.log("got connection")
                 win.webContents.send('connect', message)
             }
             function connections() {
-                console.log("connections requested")
                 win.webContents.send('connections', data)
             }
             function disconnect() {
-                console.log("someone leave")
                 win.webContents.send('disconnect', message)
             }
         }
@@ -52,6 +49,7 @@ app.whenReady().then(async () => {
     ipcMain.handle('send-message', send_message)
     ipcMain.on('exit', exit)
     ipcMain.on('change-nick', (_, data) => chat({type: 'change-nick', data}))
+    ipcMain.on('connections', () => chat({type: 'connections'}))
 
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) win = createWindow()

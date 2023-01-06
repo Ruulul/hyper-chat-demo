@@ -62,6 +62,8 @@ async function run_cli() {
   while (true) {
     const input = await question(prefix)
     if (input === '/connections') chat_instance({type: 'connections'})
+    else if (input.startsWith('/nick')) chat_instance({type: 'change-nick', data: input.slice(input.indexOf(' ') + 1)})
+    else if (input.startsWith('/room')) chat_instance({type: 'change-topic', data: input.slice(input.indexOf(' ') + 1)})
     else chat_instance({type: 'message', data: input})
   }
 }
