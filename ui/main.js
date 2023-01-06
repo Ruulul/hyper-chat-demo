@@ -19,23 +19,28 @@ const createWindow = () => {
 }
 
 app.whenReady().then(() => {
-    const win = createWindow()
+    var win = createWindow()
 
     ipcMain.handle('join-topic', join_topic)
     ipcMain.handle('send-message', send_message)
+    ipcMain.on('exit', exit)
     swarm.on('connection', conn => {
-        win.webContents.send('connect', {connections: swarm.connections.size})
+        win.webContents.send('connect', { connections: swarm.connections.size })
         conn.on('data', message => win.webContents.send('new-message', JSON.parse(message)))
-        conn.on('error', ()=>win.webContents.send('disconnect'))
+        conn.on('close', () => win.webContents.send('disconnect'))
+        conn.on('error', console.error)
     })
 
     app.on('activate', () => {
-        if (BrowserWindow.getAllWindows().length === 0) createWindow()
+        if (BrowserWindow.getAllWindows().length === 0) win = createWindow()
     })
 })
 
-app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') app.quit()
+app.on('window-all-closed', async () => {
+    if (process.platform !== 'darwin') {
+        await exit()
+        app.quit()
+    }
 })
 
 async function join_topic(_, new_topic) {
@@ -50,4 +55,11 @@ async function join_topic(_, new_topic) {
 async function send_message(_, message) {
     for (const [thinghy, conn] of swarm.connections.entries())
         conn.write(JSON.stringify(message))
+}
+
+async function exit() {
+    await Promise.all([...swarm.connections].map(conn => conn.end()))
+    await swarm.leave(topic)
+    await swarm.destroy()
+    console.log("Everything cleaned up!")
 }

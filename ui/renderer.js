@@ -1,4 +1,4 @@
-const { b4a, join_topic, send_message, onmessage, onconnect, ondisconnect } = api;
+const { b4a, join_topic, send_message, onmessage, onconnect, ondisconnect, exit } = api;
 const room_name = document.createElement("input");
 room_name.placeholder = "Insert the room name here!";
 
@@ -47,6 +47,7 @@ send_message_btn.onclick = async () => {
 onmessage((_, { user, data }) => messages.innerHTML += `<p><span>${user}: </span>${data}`)
 onconnect((_, { connections }) => connections_count.textContent = connections)
 ondisconnect(() => connections_count.textContent -= 1)
+addEventListener('beforeunload', exit)
 connect_btn.onclick = async () => {
     if (!room_name.value) return
     if (document.body.contains(chat_section)) {
@@ -54,9 +55,11 @@ connect_btn.onclick = async () => {
         messages.innerHTML = ''
     }
     connect_btn.disabled = true
-    const topic = 'v142857-chat-demo-' + room_name.value
-    const buffer = b4a.alloc(32, topic)
-    await join_topic(buffer)
+    const room = 'v142857-chat-demo-'+room_name.value;
+    const topic = b4a.alloc(32)
+    b4a.fill(topic, room, 0, room.length)
+    console.log(room, topic)
+    await join_topic(topic)
     connect_btn.disabled = false
     if (!user) document.body.append(user_div)
     else document.body.append(chat_section)

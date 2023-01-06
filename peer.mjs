@@ -21,15 +21,19 @@ const user = await question("Whats your user?\n:")
 const prefix = user + ': '
 const room_name = await question("In which room will you enter?\n:")
 const room = 'v142857-chat-demo-'+room_name;
-const topic = b4a.alloc(32, room)
-console.log(room, topic)
+const topic = b4a.alloc(32)
+b4a.fill(topic, room, 0, room.length)
+console.log(topic)
 const swarm = new Hyperswarm()
 
 swarm.on('connection', conn => {
-    int.write(`Someone connected!\n${prefix}`)
+    int.write(`Someone connected!\n${swarm.connections.size} connections\n${prefix}`)
     conn.on('data', msg => {
       const {user, data}= JSON.parse(msg)
       int.write(`\n${user}: ${data}\n${prefix}`)
+    })
+    conn.on('close', ()=>{
+      int.write(`Someone disconnected!\n${swarm.connections.size} connections\n${prefix}`)
     })
     conn.on('error', console.error)
 })
