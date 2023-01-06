@@ -2,10 +2,7 @@ const Hyperswarm = require('hyperswarm')
 const readline = require('readline')
 const goodbye = require('graceful-goodbye')
 
-module.exports = {
-  create_topic,
-  chat,
-}
+module.exports = chat
 if (require.main === module) run_cli()
 
 function question(query = '') {
@@ -27,80 +24,100 @@ async function run_cli() {
   const prefix = user + ': '
   const room_name = await question("In which room will you enter?\n:")
   const room = 'v142857-chat-demo-' + room_name;
-  const topic = create_topic(room)
-  const swarm = new Hyperswarm()
-
-  swarm.on('connection', conn => {
-    int.write(`Someone connected!\n${swarm.connections.size} connections\n${prefix}`)
-    conn.on('data', msg => {
-      const { user, data } = JSON.parse(msg)
-      int.write(`\n${user}: ${data}\n${prefix}`)
-    })
-    conn.on('close', () => {
-      int.write(`Someone disconnected!\n${swarm.connections.size} connections\n${prefix}`)
-    })
-    conn.on('error', console.error)
+  var chat_instance = undefined;
+  const nicks = {}
+  await chat({ room, nick: user }, notify => {
+    chat_instance = notify
+    return ({ head: [from] = [], type, data }) => {
+      const handle = {
+        connection, connections, disconnect,
+        nick, message, 
+      }
+      handle[type]()
+      function connection() {
+        int.write(`\n${from.toString('hex')} connected!\n${prefix}`)
+        notify({type: 'connections'})
+      }
+      function connections() {
+        int.write(`\n${data} connections\n`)
+        int.write(`\nknown nicks: `)
+        for (const [key, nick] of Object.entries(nicks))
+          int.write(`${nick}(${key}), `)
+        int.write(`\n${prefix}`)
+      }
+      function disconnect() {
+        int.write(`\n${nicks[from] || from.toString('hex')} disconnected!\n${prefix}`)
+      }
+      function nick() {
+        int.write(`\npeer ${nicks[from] || from.toString('hex')} now is named ${data}\n${prefix}`)
+        nicks[from] = data
+      }
+      function message() {
+        int.write(`\n${nicks[from] || "anom"}: ${data}\n${prefix}`)
+      }
+    }
   })
-
-  const discovery = swarm.join(topic)
-  goodbye(async () => {
-    int.write("Initializing shutdown sequence... ");
-    await Promise.all(swarm.connections.map(conn => conn.end()))
-    await swarm.leave(topic)
-    await swarm.destroy()
-    int.write("done!\n")
-  })
-
-  await discovery.flushed().then(() => int.write("Room joined succesfully\n"))
-
+  int.write("Entered successfully!")
   while (true) {
     const input = await question(prefix)
-    swarm.connections.forEach(conn => {
-      conn.write(JSON.stringify({ user, data: input }))
-    })
+    if (input === '/connections') chat_instance({type: 'connections'})
+    else chat_instance({type: 'message', data: input})
   }
-
 }
 async function chat({ swarm: swarm_instance, room: initial_room, nick: initial_nick } = {}, protocol) {
   const notify = protocol(listen)
   const swarm = swarm_instance || new Hyperswarm()
-  swarm.on('connection', (conn, data) => {
-    notify({ head: [data.publicKey], type: 'connection', data })
+  goodbye(exit)
+  const user_key = swarm.keyPair.publicKey
+  var nick = initial_nick
+  swarm.on('connection', (conn, {publicKey: peer}) => {
+    if (nick) conn.write(JSON.stringify({head: [user_key], type: 'nick', data: nick}))
+    notify({ head: [peer], type: 'connection' })
     conn.on('data', data => notify(JSON.parse(data)))
-    conn.on('close', () => notify({ type: 'disconnect', head: [data.publicKey] }))
-    conn.on('error', e => (console.error(e), notify({ type: 'disconnect', head: [data.publicKey] })))
+    conn.on('close', () => notify({ type: 'disconnect', head: [peer] }))
+    conn.on('error', e => (console.error(e), notify({ type: 'disconnect', head: [peer] })))
   })
   var topic = initial_room ? create_topic(initial_room) : undefined
   if (topic) await swarm.join(topic).flushed()
-  var nick = initial_nick || undefined
-  if (nick && topic) await send_to_all_peers({head: [], type: 'nick', data: nick})
+  return listen
   async function listen(message) {
-    const { head: [from], type, data } = message
+    const { head: [from] = [], type, data } = message
     const handle = {
-      "send-message": send_message,
+      "message": send_message,
       "change-topic": change_topic,
       "change-nick": change_nick,
       "connections": notify_connections,
+      exit,
     }
-    await handle[type]()
+    if (type in handle) await handle[type]()
+    else console.log("no handle for", type, "message. message: ", message)
 
     async function send_message() {
-      await send_to_all_peers({ head: [], type: "message", data })
+      await send_to_all_peers({ head: [user_key], type, data })
     }
     async function change_topic() {
-      if (topic) swarm.leave(topic)
+      if (topic) {
+        await Promise.all([...swarm.connections].map(conn=>conn.end()))
+        await swarm.leave(topic)
+      }
       topic = create_topic(data)
       await swarm.join(topic).flushed()
     }
     async function change_nick() {
-      await send_to_all_peers({ head: [], type: "nick", data })
+      nick = data
+      await send_to_all_peers({ head: [user_key], type: "nick", data })
     }
     async function notify_connections() {
-      await notify({ type: "connections", data: swarm.connections.size })
+      await notify({ head: [user_key], type: "connections", data: swarm.connections.size })
     }
   }
   async function send_to_all_peers(message) {
-    await Promise.all(() => [...swarm.connections].map(conn => conn.send(JSON.stringify(message))))
+    await Promise.all([...swarm.connections].map(conn => conn.write(JSON.stringify(message))))
+  }
+  async function exit () {
+      await Promise.all([...swarm.connections].map(conn => conn.end()))
+      if (topic) await swarm.leave(topic)
+      await swarm.destroy()
   }
 }
 function create_topic(topic) {
