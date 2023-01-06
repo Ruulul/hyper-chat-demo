@@ -13,9 +13,12 @@ document.body.append(connect_section)
 
 const chat_section = document.createElement("section")
 const messages = document.createElement("section")
+
 const connections_count = document.createElement("span")
 const connections_message = document.createElement("p")
 connections_message.textContent = "Connections: "
+connections_count.textContent = 0
+
 connections_message.append(connections_count)
 messages.append(connections_message)
 const user_input = document.createElement("input")
@@ -52,9 +55,8 @@ onnick((_, message)=>{
     nicks[from] = nick
 })
 onmessage((_, { head:[from], data }) => messages.innerHTML += `<p><span>${nicks[from] || 'anom'}: </span>${data}`)
-onconnect((_, connections) => {
-    console.log('connections: ', connections)
-    connections_count.textContent = connections
+onconnect((_, peerKey) => {
+    connections_count.textContent = Number(connections_count.textContent) + 1
 })
 ondisconnect((_, {head: [from]}) => (delete nicks[from], connections_count.textContent -= 1))
 addEventListener('beforeunload', exit)

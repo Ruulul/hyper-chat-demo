@@ -22,23 +22,21 @@ app.whenReady().then(async () => {
     await Chat(undefined, notify => {
         chat = notify
         return message => {
-            const { head: [from], type, data } = message
+            const { type, data } = message
             const handle = {
                 message: handle_message, nick, 
                 connection, disconnect, connections, 
             }
             handle[type]()
             function handle_message() {
-                console.log("got message")
                 win.webContents.send('new-message', message)
             }
             function nick() {
-                console.log("got nick")
                 win.webContents.send('nick', message)
             }
             function connection() {
                 console.log("got connection")
-                win.webContents.send('connection', message)
+                win.webContents.send('connect', message)
             }
             function connections() {
                 console.log("connections requested")
