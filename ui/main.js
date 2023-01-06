@@ -1,9 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron')
 const path = require('path')
-
-const Hyperswarm = require('hyperswarm')
-const swarm = new Hyperswarm()
-var topic = undefined
+const Chat = require('../peer.js')
+var chat = undefined
 
 const createWindow = () => {
     const win = new BrowserWindow({
@@ -18,18 +16,38 @@ const createWindow = () => {
     return win
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
     var win = createWindow()
 
+    await Chat(undefined, notify => {
+        chat = notify
+        return message => {
+            const { head: [from], type, data } = message
+            const handle = {
+                message: handle_message, nick, 
+                connection, disconnect, connections, 
+            }
+            handle[type]()
+            function handle_message() {
+                win.webContents.send('new-message', message)
+            }
+            function nick() {
+                win.webContents.send('nick', message)
+            }
+            function connection() {
+                win.webContents.send('connection', message)
+            }
+            function connections() {
+                win.webContents.send('connections', data)
+            }
+            function disconnect() {
+                win.webContents.send('disconnect', message)
+            }
+        }
+    })
     ipcMain.handle('join-topic', join_topic)
     ipcMain.handle('send-message', send_message)
     ipcMain.on('exit', exit)
-    swarm.on('connection', conn => {
-        win.webContents.send('connect', { connections: swarm.connections.size })
-        conn.on('data', message => win.webContents.send('new-message', JSON.parse(message)))
-        conn.on('close', () => win.webContents.send('disconnect'))
-        conn.on('error', console.error)
-    })
 
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) win = createWindow()
@@ -44,23 +62,14 @@ app.on('window-all-closed', async () => {
 })
 
 async function join_topic(_, new_topic) {
-    if (topic) {
-        await Promise.all([...swarm.connections].map(conn => conn.end()))
-        await swarm.leave(topic)
-    }
-    topic = new_topic
-    await swarm.join(topic).flushed()
+    await chat({type: 'change-topic', data: new_topic})
 }
 
 async function send_message(_, message) {
-    for (const [thinghy, conn] of swarm.connections.entries())
-        conn.write(JSON.stringify(message))
+    await chat({type: 'message', data: message})
 }
 
 async function exit() {
-    if (swarm.destroyed) return app.quit()
-    await Promise.all([...swarm.connections].map(conn => conn.end()))
-    if (topic) await swarm.leave(topic)
-    await swarm.destroy()
+    await chat({type: 'exit'})
     console.log("Everything cleaned up!")
 }

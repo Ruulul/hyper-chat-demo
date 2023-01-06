@@ -13,13 +13,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "browserify": "^17.0.0",
-    "budo": "^11.8.4",
     "electron": "^22.0.0",
-    "hyperswarm": "^4.3.5",
-    "nodemon": "^2.0.20"
-  },
-  "dependencies": {
-    "b4a": "^1.6.1"
+    "hyperswarm": "^4.3.5"
   }
 }

@@ -2,18 +2,17 @@
   "name": "hyper-chat-demo",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "peer.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "tauri": "tauri"
+    "start": "pnpm run cli",
+    "cli": "node ."
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "b4a": "^1.6.1",
     "graceful-goodbye": "^1.2.0",
-    "hypercore": "^10.5.3",
     "hyperswarm": "^4.3.5"
   }
 }
