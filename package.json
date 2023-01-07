@@ -12,7 +12,6 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "b4a": "^1.6.1",
     "graceful-goodbye": "^1.2.0",
     "hyperswarm": "^4.3.5"
   }

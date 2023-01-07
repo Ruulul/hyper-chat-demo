@@ -1,7 +1,6 @@
 const Hyperswarm = require('hyperswarm')
 const readline = require('readline')
 const goodbye = require('graceful-goodbye')
-const b4a = require('b4a')
 
 module.exports = chat
 if (require.main === module) run_cli()
@@ -36,18 +35,19 @@ async function run_cli() {
       }
       handle[type]()
       function connection() {
-        int.write(`\n${b4a.toString(from, 'hex')} connected!\n${prefix()}`)
+        int.write(`\n${from.toString('hex')} connected!\n${prefix()}`)
         notify({ type: 'connections' })
       }
       function connections() {
         int.write(`\n${data} connections\n`)
-        int.write(`\nknown nicks: `)
-        for (const [key, nick] of Object.entries(nicks))
-          int.write(`${nick}(${b4a.toString(key, 'hex')}), `)
+        int.write(`\nknown nicks:\n`)
+        for (const key in nicks) {
+          int.write(`\t${nicks[key]} ( ${Buffer.from(key).toString('hex')} ),\n`)
+        }
         int.write(`\n${prefix()}`)
       }
       function disconnect() {
-        int.write(`\n${nicks[from] || b4a.toString(from, 'hex')} disconnected!\n${prefix()}`)
+        int.write(`\n${nicks[from] || from.toString('hex')} disconnected!\n${prefix()}`)
         delete nicks[from]
       }
       function message() {
@@ -55,9 +55,7 @@ async function run_cli() {
         for (const key of Object.keys(data)) message_handles[key]() 
       }
       function handle_nick() {
-        console.log(from)
-        console.log(from instanceof Buffer)
-        int.write(`\npeer ${nicks[from] || b4a.toString(from, 'hex')} now is named ${data.nick}\n${prefix()}`)
+        int.write(`\npeer ${nicks[from] || from.toString('hex')} now is named ${data.nick}\n${prefix()}`)
         nicks[from] = data.nick
       }
       function handle_message() {
