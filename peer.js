@@ -66,13 +66,17 @@ async function run_cli() {
   int.write("Entered successfully!")
   while (true) {
     const input = await question(prefix())
-    if (input === '/connections') chat_instance({ type: 'connections' })
+    if (input === '/connections' || input === '/nicks') chat_instance({ type: 'connections' })
     else if (input.startsWith('/nick')) 
     { user = input.slice(input.indexOf(' ') + 1) 
-      chat_instance({ type: 'change-nick', data: user})
+      chat_instance({ type: 'message', data: { nick: user }})
     }
     else if (input.startsWith('/room')) chat_instance({ type: 'change-topic', data: input.slice(input.indexOf(' ') + 1) })
-    else chat_instance({ type: 'message', data: input })
+    else if (input in ['/exit', '/q', '/quit']) {
+      await chat_instance({ type: 'exit' })
+      break
+    }
+    else chat_instance({ type: 'message', data: {message : input } })
   }
 }
 async function chat({ swarm: swarm_instance, room: initial_room, nick: initial_nick } = {}, protocol) {
@@ -96,7 +100,6 @@ async function chat({ swarm: swarm_instance, room: initial_room, nick: initial_n
     const handle = {
       "message": send_message,
       "change-topic": change_topic,
-      "change-nick": change_nick,
       "connections": notify_connections,
       exit,
     }
@@ -104,7 +107,7 @@ async function chat({ swarm: swarm_instance, room: initial_room, nick: initial_n
     else console.log("no handle for", type, "message. message: ", message)
 
     async function send_message() {
-      await send_to_all_peers({ head: [user_key], type, data: { message: data } })
+      await send_to_all_peers({ head: [user_key], type, data })
     }
     async function change_topic() {
       if (topic) {
@@ -113,10 +116,6 @@ async function chat({ swarm: swarm_instance, room: initial_room, nick: initial_n
       }
       topic = create_topic(data)
       await swarm.join(topic).flushed()
-    }
-    async function change_nick() {
-      nick = data
-      await send_to_all_peers({ head: [user_key], type: "message", data: { nick } })
     }
     async function notify_connections() {
       await notify({ head: [user_key], type: "connections", data: swarm.connections.size })

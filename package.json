@@ -1,15 +1,15 @@
 {
   "name": "hyper-chat-demo",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.1.0",
+  "description": "ephemeral chat component based on topics and hyperswarm",
   "main": "peer.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "pnpm run cli",
     "cli": "node ."
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["hypercore", "hyperswarm", "ephemeral", "chat"],
+  "author": "v142857",
   "license": "MIT",
   "dependencies": {
     "graceful-goodbye": "^1.2.0",
