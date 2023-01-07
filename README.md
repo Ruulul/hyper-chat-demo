@@ -11,7 +11,7 @@ pnpm start # or pnpm run cli
 ## Using in code
 ```js
 const Chat = require("hyper-chat-demo")
-let chat_instance = await Chat(options, 
+let chat_instance = await Chat(options = { swarm: swarm_instance, room: initial_room, nick: initial_nick }, 
     chat_instance => //protocol function, you can catch and manage the chat instance by the argument of this function instead
         message => { //listener function, receives message from the component
             const { head: [from], type, data } = message
