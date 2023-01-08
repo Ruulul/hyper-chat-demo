@@ -7,11 +7,16 @@ module.exports = chat
  *  head: Buffer[],
  *  type: 'message' | 'info' | 'update' | 'change-topic' | 'connections' | 'exit',
  *  data: any
- * }} Message
+ * }} Command
+* @typedef {{
+*  head: Buffer[],
+*  type: 'message' | 'info' | 'update' | 'connections' | 'connection' | 'disconnect',
+*  data: any
+* }} Message
  * @function chat
  * @param {{ swarm: Hyperswarm, room: string, info: any}} options 
- * @param {(listen: (message: Message) => Promise<void>) => (message: Message) => Promise<void>} protocol 
- * @returns {(message: Message) => Promise<void>}
+ * @param {(listen: (message: Command) => Promise<void>) => (message: Message) => Promise<void>} protocol 
+ * @returns {(message: Command) => Promise<void>}
  */
 async function chat({ swarm: swarm_instance, room: initial_room, info: initial_info } = {}, protocol) {
   const notify = protocol(listen)
@@ -30,7 +35,7 @@ async function chat({ swarm: swarm_instance, room: initial_room, info: initial_i
   if (topic) await swarm.join(topic).flushed()
   return listen
   /**
-   * @param {Message} message 
+   * @param {Command} message 
    */
   async function listen(message) {
     const { head: [from] = [], type, data } = message
