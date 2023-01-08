@@ -9,13 +9,22 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "pnpm run cli",
+    "build": "pkg ./bin/index.js",
     "cli": "node ./bin/index.js"
   },
-  "keywords": ["hypercore", "hyperswarm", "ephemeral", "chat"],
+  "keywords": [
+    "hypercore",
+    "hyperswarm",
+    "ephemeral",
+    "chat"
+  ],
   "author": "v142857",
   "license": "MIT",
   "dependencies": {
     "graceful-goodbye": "^1.2.0",
     "hyperswarm": "^4.3.5"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.0"
   }
 }
