@@ -1,6 +1,6 @@
 {
   "name": "hyper-chat-demo",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "ephemeral chat component based on topics and hyperswarm",
   "main": "index.js",
   "bin": "./bin/index.js",

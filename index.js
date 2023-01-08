@@ -2,6 +2,17 @@ const Hyperswarm = require('hyperswarm')
 const goodbye = require('graceful-goodbye')
 
 module.exports = chat
+/**
+ * @typedef {{
+ *  head: Buffer[],
+ *  type: 'message' | 'info' | 'update' | 'change-topic' | 'connections' | 'exit',
+ *  data: any
+ * }} Message
+ * @function chat
+ * @param {{ swarm: Hyperswarm, room: string, info: any}} options 
+ * @param {(listen: (message: Message) => Promise<void>) => (message: Message) => Promise<void>} protocol 
+ * @returns {(message: Message) => Promise<void>}
+ */
 async function chat({ swarm: swarm_instance, room: initial_room, info: initial_info } = {}, protocol) {
   const notify = protocol(listen)
   const swarm = swarm_instance || new Hyperswarm()
@@ -18,6 +29,9 @@ async function chat({ swarm: swarm_instance, room: initial_room, info: initial_i
   var topic = initial_room ? create_topic(initial_room) : undefined
   if (topic) await swarm.join(topic).flushed()
   return listen
+  /**
+   * @param {Message} message 
+   */
   async function listen(message) {
     const { head: [from] = [], type, data } = message
     const handle = {
@@ -29,7 +43,7 @@ async function chat({ swarm: swarm_instance, room: initial_room, info: initial_i
       exit,
     }
     if (type in handle) await handle[type]()
-    else console.log("no handle for", type, "message. message: ", message)
+    else console.error("no handle for", type, "message. message: ", message)
 
     async function send_message() {
       if (type === 'info') info = data
