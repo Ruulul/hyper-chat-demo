@@ -3,13 +3,10 @@
   "version": "0.2.1",
   "description": "ephemeral chat component based on topics and hyperswarm",
   "main": "index.js",
-  "bin": {
-    "hyper-chat-demo": "./bin/index.js"
-  },
+  "bin": "./bin/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "pnpm run cli",
-    "build": "pkg ./bin/index.js",
     "cli": "node ./bin/index.js"
   },
   "keywords": [
@@ -23,8 +20,5 @@
   "dependencies": {
     "graceful-goodbye": "^1.2.0",
     "hyperswarm": "^4.3.5"
-  },
-  "devDependencies": {
-    "pkg": "^5.8.0"
   }
 }

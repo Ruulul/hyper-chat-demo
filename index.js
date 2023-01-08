@@ -32,6 +32,8 @@ async function chat({ swarm: swarm_instance, room: initial_room, info: initial_i
     else console.log("no handle for", type, "message. message: ", message)
 
     async function send_message() {
+      if (type === 'info') info = data
+      else if (type === 'update') Object.assign(info, data)
       await send_to_all_peers({ head: [user_key], type, data })
     }
     async function change_topic() {
