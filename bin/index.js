@@ -20,31 +20,32 @@ async function cli() {
                 connections, disconnect,
                 message, info, update,
             }
-            if (type in handles) handles[type]()
+            if (type in handles) {
+                clear_line()
+                handles[type]()
+                int.write(prefix())
+            }
             function connections() {
-                int.write(`\r${data} connections\n`)
+                int.write(`${data} connections\n`)
                 int.write(`known nicks:\n`)
                 for (const key in nicks) {
                     int.write(`\t${nicks[key]} ( ${Buffer.from(key).toString('hex')} ),\n`)
                 }
-                int.write(`${prefix()}`)
             }
             function disconnect() {
-                int.write(`\r${nicks[from] || from.toString('hex')} disconnected!\n${prefix()}`)
+                int.write(`${nicks[from] || from.toString('hex')} disconnected!\n`)
                 delete nicks[from]
             }
             function info() {
-                int.write(`\r${data} entered the chat!\n${prefix()}`)
+                int.write(`${data} entered the chat!\n`)
                 nicks[from] = data
             }
             function update() {
-                int.write(`\n${nicks[from] || from.toString('hex')} is now ${data}\n${prefix()}`)
+                int.write(`${nicks[from] || from.toString('hex')} is now ${data}\n`)
                 nicks[from] = data
             }
             function message() {
-                int.write(`\r${nicks[from] || "anom"}: ${data}${
-                    ' '.repeat(process.stdout.getWindowSize()[0] - data.length - (nicks[from] || "anom").length - 2)
-                }\n${prefix()}`)
+                int.write(`${nicks[from] || "anom"}: ${data}\n`)
             }
         }
     })
@@ -94,6 +95,11 @@ async function cli() {
     function exit() {
         return chat_instance({ type: 'exit' })
     }
+}
+
+function clear_line() {
+    const white_line = ' '.repeat(process.stdout.getWindowSize()[0])
+    process.stdout.write('\r' + white_line + '\r')
 }
 
 function question(query = '') {
