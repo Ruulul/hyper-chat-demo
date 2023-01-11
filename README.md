@@ -1,6 +1,7 @@
 ## Starting the cli
 ```bash
-pnpm start # or pnpm run cli
+npm i -g hyper-chat-demo
+hyper-chat-demo
 # enter your user and topic of choice
 # use /nick [nick] to change your nick, 
 # /topic [topic] to change the room, 

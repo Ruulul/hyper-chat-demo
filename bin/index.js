@@ -1,3 +1,5 @@
+#!/usr/bin/env node 
+
 const readline = require('readline')
 const chat = require('..')
 const int = process.stdout
@@ -9,9 +11,8 @@ async function cli() {
     const prefix = () => user + ': '
     const room_name = await question("In which room will you enter?\n:")
     const room = 'v142857-chat-demo-' + room_name;
-    var chat_instance = undefined;
     const nicks = {}
-    await chat({ room, info: user }, notify => {
+    const chat_instance = await chat({ room, info: user }, notify => {
         chat_instance = notify
         return ({ head: [from] = [], type, data }) => {
             const handle = {
