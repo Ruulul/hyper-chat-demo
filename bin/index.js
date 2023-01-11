@@ -1,4 +1,4 @@
-#!/usr/bin/env node 
+#!/usr/bin/env node
 
 const readline = require('readline')
 const chat = require('..')
@@ -14,15 +14,11 @@ async function cli() {
     const nicks = {}
     const chat_instance = await chat({ room, info: user }, notify => {
         return ({ head: [from] = [], type, data }) => {
-            const handle = {
-                connection, connections, disconnect,
-                message, info, update: info,
+            const handles = {
+                connections, disconnect,
+                message, info, update,
             }
-            handle[type]()
-            function connection() {
-                int.write(`\r${from.toString('hex')} connected!\n${prefix()}`)
-                notify({ type: 'connections' })
-            }
+            if (type in handles) handles[type]()
             function connections() {
                 int.write(`\r${data} connections\n`)
                 int.write(`known nicks:\n`)
@@ -36,7 +32,11 @@ async function cli() {
                 delete nicks[from]
             }
             function info() {
-                int.write(`\rpeer ${nicks[from] || from.toString('hex')} now is named ${data}\n${prefix()}`)
+                int.write(`\r${data} entered the chat!\n${prefix()}`)
+                nicks[from] = data
+            }
+            function update() {
+                int.write(`\n${nicks[from] || from.toString('hex')} is now ${data}\n${prefix()}`)
                 nicks[from] = data
             }
             function message() {
@@ -45,19 +45,38 @@ async function cli() {
         }
     })
     int.write("\nEntered successfully!\n")
+    const commands = {
+        connections: require_connections,
+        nicks: require_connections,
+        nick: change_nick,
+        room: change_room,
+        exit,
+        q: exit,
+        quit: exit,
+    }
     while (true) {
         const input = await question(prefix())
-        if (input === '/connections' || input === '/nicks') chat_instance({ type: 'connections' })
-        else if (input.startsWith('/nick')) {
-            user = input.slice(input.indexOf(' ') + 1)
-            chat_instance({ type: 'info', data: user })
-        }
-        else if (input.startsWith('/room')) chat_instance({ type: 'change-topic', data: input.slice(input.indexOf(' ') + 1) })
-        else if (input in ['/exit', '/q', '/quit']) {
-            await chat_instance({ type: 'exit' })
-            break
-        }
+        const space_index = input.indexOf(' ')
+        const after_space = space_index > 0 ? input.slice(space_index + 1) : undefined
+        const command = input.slice(1, space_index > 0 ? space_index : undefined)
+        if (input[0] === '/' && command in commands) await commands[command](after_space)
         else chat_instance({ type: 'message', data: input })
+
+        if (['exit', 'q', 'quit'].includes(command)) break
+    }
+
+    function require_connections () {
+        return chat_instance({ type: 'connections' })
+    }
+    function change_nick (data) {
+        user = data
+        return chat_instance({ type: 'update', data })
+    }
+    function change_room (data) {
+        return chat_instance({ type: 'change-topic', data })
+    }
+    function exit () {
+        return chat_instance({ type: 'exit' })
     }
 }
 

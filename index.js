@@ -52,7 +52,11 @@ async function chat({ swarm: swarm_instance, room: initial_room, info: initial_i
 
     async function send_message() {
       if (type === 'info') info = data
-      else if (type === 'update') Object.assign(info, data)
+      else if (type === 'update') {
+        if (typeof info === 'object')
+          Object.assign(info, data)
+        else info = data
+      }
       await send_to_all_peers({ head: [user_key], type, data })
     }
     async function change_topic() {
