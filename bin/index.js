@@ -13,7 +13,6 @@ async function cli() {
     const room = 'v142857-chat-demo-' + room_name;
     const nicks = {}
     const chat_instance = await chat({ room, info: user }, notify => {
-        chat_instance = notify
         return ({ head: [from] = [], type, data }) => {
             const handle = {
                 connection, connections, disconnect,
